@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sistema de Diárias</title>
+</head>
+
+<body>
+  <h2>Cadastrar Viagem</h2>
+
+  <input id="nome" placeholder="Nome"><br><br>
+  <input id="destino" placeholder="Destino"><br><br>
+  <input id="data" type="date"><br><br>
+
+  <button onclick="cadastrar()">Cadastrar</button>
+
+  <h2>Lista de Viagens</h2>
+  <ul id="lista"></ul>
+
+  <script>
+    async function cadastrar() {
+      const nome = document.getElementById("nome").value;
+      const destino = document.getElementById("destino").value;
+      const data = document.getElementById("data").value;
+
+      await fetch("http://localhost:3000/viagens", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, destino, data })
+      });
+
+      carregar();
+    }
+
+    async function carregar() {
+      const res = await fetch("http://localhost:3000/viagens");
+      const viagens = await res.json();
+
+      const lista = document.getElementById("lista");
+      lista.innerHTML = "";
+
+      viagens.forEach(v => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          ${v.nome} - ${v.destino} - ${v.status}
+          <button onclick="aprovar(${v.id})">Aprovar</button>
+        `;
+        lista.appendChild(li);
+      });
+    }
+
+    async function aprovar(id) {
+      await fetch(`http://localhost:3000/viagens/${id}`, {
+        method: "PUT"
+      });
+
+      carregar();
+    }
+
+    carregar();
+  </script>
+</body>
+</html>
